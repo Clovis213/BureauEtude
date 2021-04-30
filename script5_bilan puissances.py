@@ -99,7 +99,7 @@ def integration(x,y, c):
         if k==0:
             z[k] = c
         else:
-            z[k] = c+z[k-1]+(x[k]-x[k-1])*y[k]
+            z[k] = z[k-1]+(x[k]-x[k-1])*y[k]
     
     return(z)
 
@@ -194,9 +194,10 @@ plt.axvline(0, color='gray')
 s_pv = 2   #en m2
 n_pv = 0.15 #rendement Panneau
 n_h1 = 0.85 #rendement hacheur 1
+n_h2 = 0.85 #rendement hacheur 2
 n_mot = 0.80 #rendement moteur
-W_stock_init = 0 #charge initiale de la batterie
-n_stock = 0.82 #rendement de stockage de la batterie (64% + ((100-64)/2)
+W_stock_init = 350 #charge initiale de la batterie
+n_stock = 0.64 #rendement de stockage de la batterie
 b_assist = 0.5  #coeff d'assistance - 1=beaucoup d'assistance, 0=pas beaucoup d'assistance
 b_frein = 0.5   #coeff de récupération lors du freinage
 
@@ -205,26 +206,16 @@ b_frein = 0.5   #coeff de récupération lors du freinage
 # CHARGE :
 
 #Panneau solaire :
-P_pv = eclairement_juin*s_pv*n_pv #puissance fournie par le panneau
+P_pv = eclairement*s_pv*n_pv #puissance fournie par le panneau
 #Affichage :
-plt.plot(temps_E/3600, P_pv, color = "gray", linewidth = 0.5)
+#plt.plot(temps/3600, P_pv, color = "gray", linewidth = 0.5)
 plt.ylabel("Puissance (W)")
 
 
 #1er hacheur :
 P_h1 = n_h1*P_pv #puissance de charge
 #Affichage :
-plt.plot(temps_E/3600, P_h1, color = "orange", linewidth = 0.5)
-
-
-#batterie :
-P_bat = n_stock*P_h1
-#Affichage :
-plt.plot(temps_E/3600, P_bat, color = "red", linewidth = 0.5)
-#Energie batterie :
-W_stock = integration(temps_E/3600, P_bat, W_stock_init)
-#Affichage :
-plt.plot(temps_E/3600, W_stock, color = "orange", linewidth = 0.5)
+#plt.plot(temps/3600, P_h1, color = "orange", linewidth = 0.5)
 
 
 
@@ -232,9 +223,9 @@ plt.plot(temps_E/3600, W_stock, color = "orange", linewidth = 0.5)
 # DECHARGE :
 
 #puissance du vélo :
-plt.plot(temps/3600, puissance, color = "green", linewidth = 0.5)
+#plt.plot(temps/3600, puissance, color = "green", linewidth = 0.5)
 #energie du vélo :
-plt.plot(temps/3600, energie, color = "purple", linewidth = 0.5)
+#plt.plot(temps/3600, energie, color = "purple", linewidth = 0.5)
 
 #Calcul de la puissance mécanique :
 P_m = np.zeros(len(temps))
@@ -250,16 +241,60 @@ for i in range(len(temps)-1):
         P_frein[i] = 0
         
         P_m[i] = b_assist*puissance[i]
-        P_cycliste[i] = puissance-P_m[i]
+        P_cycliste[i] = puissance[i]-P_m[i]
         
+# Affichage :
+plt.plot(temps/3600, P_m, color = "red", linewidth = 0.5)
+
 # Calcul de la puissance électrique
 P_a = np.zeros(len(temps))
 
 for j in range(len(temps)-1):
-    if(P_m[i] < 0):
-        P_a[i] = n_mot*P_m[i]
+    if(P_m[j] < 0):
+        P_a[j] = n_mot*P_m[j]
     else:
-        P_a[i] = P_m[i]/n_mot
+        P_a[j] = P_m[j]/n_mot
+
+# Affichage :
+#plt.plot(temps/3600, P_a, color = "blue", linewidth = 0.5)
+
+# 2eme hacheur
+P_var = np.zeros(len(temps))
+
+for k in range(len(temps)):
+    if(P_a[k] < 0):
+        P_var[k] = P_a[k]*n_h2
+    else:
+        P_var[k] = P_a[k]/n_h2
+        
+# Affichage :
+#plt.plot(temps/3600, P_var, color = "orange", linewidth = 0.5)
+
+
+# STOCKAGE
+
+# batterie
+P_bat = P_h1-P_var
+
+#Affichage :
+#plt.plot(temps/3600, P_bat, color = "gray", linewidth = 0.5)
+
+
+#pertes de stockage :
+
+P_stock = np.zeros(len(temps))
+
+for l in range(len(temps)):
+    if(P_bat[l] < 0):
+        P_stock[l] = P_bat[l]/n_stock
+    else:
+        P_stock[l] = P_bat[l]*n_stock
+
+#Energie batterie :
+W_stock = integration(temps/3600, P_bat, W_stock_init)
+#Affichage :
+plt.plot(temps/3600, W_stock, color = "black", linewidth = 0.5)
+
 
 
 ### FIN BILAN DES PUISSANCES ###
