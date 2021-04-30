@@ -196,7 +196,8 @@ n_pv = 0.15 #rendement Panneau
 n_h1 = 0.85 #rendement hacheur 1
 W_stock_init = 0 #charge initiale de la batterie
 n_stock = 0.82 #rendement de stockage de la batterie (64% + ((100-64)/2)
-P_cycliste = 200 #puissance du cycliste, constante pour l'instant
+b_assist = 0.5  #coeff d'assistance - 1=beaucoup d'assistance, 0=pas beaucoup d'assistance
+b_frein = 0.5   #coeff de récupération lors du freinage
 
 
 
@@ -232,20 +233,23 @@ plt.plot(temps_E/3600, W_stock, color = "orange", linewidth = 0.5)
 #puissance du vélo :
 plt.plot(temps/3600, puissance, color = "green", linewidth = 0.5)
 #energie du vélo :
-plt.plot(temps/3600, energie, color = "yellow", linewidth = 0.5)
+plt.plot(temps/3600, energie, color = "purple", linewidth = 0.5)
 
 #Calcul de la puissance mécanique :
 P_m = np.zeros(len(temps))
 P_frein = np.zeros(len(temps))
+P_cycliste = np.zeros(len(temps))
+
+
 
 for i in range(len(temps)-1):
     if(puissance[i] < 0):
-        P_cycliste = 0
+        P_cycliste[i] = 0
     else:
-        P_frein = 0
-    P_frein[i] = P_m[i] - puissance[i] + P_cycliste
+        P_frein[i] = 0
+    P_frein[i] = P_m[i] - puissance[i] + P_cycliste[i]
 
-
+#P_m = b_frein*puissance
 
 ### FIN BILAN DES PUISSANCES ###
 
