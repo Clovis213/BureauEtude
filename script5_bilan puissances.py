@@ -194,6 +194,7 @@ plt.axvline(0, color='gray')
 s_pv = 2   #en m2
 n_pv = 0.15 #rendement Panneau
 n_h1 = 0.85 #rendement hacheur 1
+n_mot = 0.80 #rendement moteur
 W_stock_init = 0 #charge initiale de la batterie
 n_stock = 0.82 #rendement de stockage de la batterie (64% + ((100-64)/2)
 b_assist = 0.5  #coeff d'assistance - 1=beaucoup d'assistance, 0=pas beaucoup d'assistance
@@ -241,15 +242,23 @@ P_frein = np.zeros(len(temps))
 P_cycliste = np.zeros(len(temps))
 
 
-
 for i in range(len(temps)-1):
     if(puissance[i] < 0):
+        P_m[i] = b_frein*puissance[i]
         P_cycliste[i] = 0
     else:
         P_frein[i] = 0
-    P_frein[i] = P_m[i] - puissance[i] + P_cycliste[i]
+        
+        P_m[i] = b_assist*puissance[i]
+        P_cycliste[i] = puissance-P_m[i]
+        
+# Calcul de la puissance électrique
+for j in range(len(temps)-1):
+    if(P_m[i] < 0):
+        Pa = ηmot*Pm
+    else:
+        Pa = Pm/ηmot]
 
-#P_m = b_frein*puissance
 
 ### FIN BILAN DES PUISSANCES ###
 
