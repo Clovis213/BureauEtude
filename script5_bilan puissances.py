@@ -253,11 +253,13 @@ for i in range(len(temps)-1):
         P_cycliste[i] = puissance-P_m[i]
         
 # Calcul de la puissance électrique
+P_a = np.zeros(len(temps))
+
 for j in range(len(temps)-1):
     if(P_m[i] < 0):
-        Pa = ηmot*Pm
+        P_a[i] = n_mot*P_m[i]
     else:
-        Pa = Pm/ηmot]
+        P_a[i] = P_m[i]/n_mot
 
 
 ### FIN BILAN DES PUISSANCES ###
