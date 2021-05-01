@@ -209,7 +209,7 @@ r = 0.311 #rayon de la roue
 #Panneau solaire :
 P_pv = eclairement*s_pv*n_pv #puissance fournie par le panneau
 #Affichage :
-plt.plot(temps/3600, P_pv, color = "gray", linewidth = 0.5)
+#plt.plot(temps/3600, P_pv, color = "gray", linewidth = 0.5)
 
 
 
@@ -245,7 +245,7 @@ for i in range(len(temps)-1):
         P_cycliste[i] = puissance[i]-P_m[i]
         
 # Affichage :
-plt.plot(temps/3600, P_m, color = "red", linewidth = 0.5)
+#plt.plot(temps/3600, P_m, color = "red", linewidth = 0.5)
 
 # Calcul de la puissance électrique
 P_a = np.zeros(len(temps))
@@ -294,21 +294,21 @@ for l in range(len(temps)-1):
 #Energie batterie :
 W_stock = integration(temps/3600, P_bat, W_stock_init)
 #Affichage :
-plt.plot(temps/3600, W_stock, color = "black", linewidth = 0.5)
+#plt.plot(temps/3600, W_stock, color = "black", linewidth = 0.5)
 
 
 
 #Rapport couple/vitesse de rotation
-omega = vitesse/r
+omega = (vitesse/(2*np.pi*r))/60
 C = P_m/omega
 
 #Affichage :
-#plt.plot(omega, C, color = "black", linewidth = 0.5)
+plt.plot(omega, P_m, color = "#00005F", marker = ".", markersize=5, markevery=400, linewidth = 0)
 
 
 
-plt.ylabel("Puissance (W), énergie (Wh)")
-plt.xlabel("Temps (h)")
+plt.ylabel("Puissance (W)")
+plt.xlabel("Vitesse de rotation (t/min)")
 
 
 ### FIN BILAN DES PUISSANCES ###
