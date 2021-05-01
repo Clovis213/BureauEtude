@@ -143,7 +143,7 @@ eclairement = np.interp(temps, temps_E, eclairement_juin)
 
 
 #Filtrage de la distance
-distance_m = glissante(distance, 700)
+distance_m = glissante(distance, 5000)
 
 #Calcul de la vitesse
 vitesse = derivation(temps, distance_m)
@@ -200,7 +200,7 @@ W_stock_init = 350 #charge initiale de la batterie
 n_stock = 0.64 #rendement de stockage de la batterie
 b_assist = 0.5  #coeff d'assistance - 1=beaucoup d'assistance, 0=pas beaucoup d'assistance
 b_frein = 0.5  #coeff de récupération lors du freinage
-r = 311 #rayon de la roue
+r = 0.311 #rayon de la roue
 
 
 
@@ -209,7 +209,7 @@ r = 311 #rayon de la roue
 #Panneau solaire :
 P_pv = eclairement*s_pv*n_pv #puissance fournie par le panneau
 #Affichage :
-#plt.plot(temps/3600, P_pv, color = "gray", linewidth = 0.5)
+plt.plot(temps/3600, P_pv, color = "gray", linewidth = 0.5)
 
 
 
@@ -245,7 +245,7 @@ for i in range(len(temps)-1):
         P_cycliste[i] = puissance[i]-P_m[i]
         
 # Affichage :
-#plt.plot(temps/3600, P_m, color = "red", linewidth = 0.5)
+plt.plot(temps/3600, P_m, color = "red", linewidth = 0.5)
 
 # Calcul de la puissance électrique
 P_a = np.zeros(len(temps))
@@ -294,7 +294,7 @@ for l in range(len(temps)-1):
 #Energie batterie :
 W_stock = integration(temps/3600, P_bat, W_stock_init)
 #Affichage :
-#plt.plot(temps/3600, W_stock, color = "black", linewidth = 0.5)
+plt.plot(temps/3600, W_stock, color = "black", linewidth = 0.5)
 
 
 
@@ -303,9 +303,12 @@ omega = vitesse/r
 C = P_m/omega
 
 #Affichage :
-plt.plot(omega, C, color = "black", linewidth = 0.5)
-plt.ylabel("Puissance (W)")
-plt.xlabel("Vitesse de rotation")
+#plt.plot(omega, C, color = "black", linewidth = 0.5)
+
+
+
+plt.ylabel("Puissance (W), énergie (Wh)")
+plt.xlabel("Temps (h)")
 
 
 ### FIN BILAN DES PUISSANCES ###
