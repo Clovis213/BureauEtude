@@ -199,7 +199,8 @@ n_mot = 0.80 #rendement moteur
 W_stock_init = 350 #charge initiale de la batterie
 n_stock = 0.64 #rendement de stockage de la batterie
 b_assist = 0.5  #coeff d'assistance - 1=beaucoup d'assistance, 0=pas beaucoup d'assistance
-b_frein = 0.5   #coeff de récupération lors du freinage
+b_frein = 0.5  #coeff de récupération lors du freinage
+r = 311 #rayon de la roue
 
 
 
@@ -209,7 +210,7 @@ b_frein = 0.5   #coeff de récupération lors du freinage
 P_pv = eclairement*s_pv*n_pv #puissance fournie par le panneau
 #Affichage :
 #plt.plot(temps/3600, P_pv, color = "gray", linewidth = 0.5)
-plt.ylabel("Puissance (W)")
+
 
 
 #1er hacheur :
@@ -244,7 +245,7 @@ for i in range(len(temps)-1):
         P_cycliste[i] = puissance[i]-P_m[i]
         
 # Affichage :
-plt.plot(temps/3600, P_m, color = "red", linewidth = 0.5)
+#plt.plot(temps/3600, P_m, color = "red", linewidth = 0.5)
 
 # Calcul de la puissance électrique
 P_a = np.zeros(len(temps))
@@ -261,7 +262,7 @@ for j in range(len(temps)-1):
 # 2eme hacheur
 P_var = np.zeros(len(temps))
 
-for k in range(len(temps)):
+for k in range(len(temps)-1):
     if(P_a[k] < 0):
         P_var[k] = P_a[k]*n_h2
     else:
@@ -284,7 +285,7 @@ P_bat = P_h1-P_var
 
 P_stock = np.zeros(len(temps))
 
-for l in range(len(temps)):
+for l in range(len(temps)-1):
     if(P_bat[l] < 0):
         P_stock[l] = P_bat[l]/n_stock
     else:
@@ -293,8 +294,18 @@ for l in range(len(temps)):
 #Energie batterie :
 W_stock = integration(temps/3600, P_bat, W_stock_init)
 #Affichage :
-plt.plot(temps/3600, W_stock, color = "black", linewidth = 0.5)
+#plt.plot(temps/3600, W_stock, color = "black", linewidth = 0.5)
 
+
+
+#Rapport couple/vitesse de rotation
+omega = vitesse/r
+C = P_m/omega
+
+#Affichage :
+plt.plot(omega, C, color = "black", linewidth = 0.5)
+plt.ylabel("Puissance (W)")
+plt.xlabel("Vitesse de rotation")
 
 
 ### FIN BILAN DES PUISSANCES ###
