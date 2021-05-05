@@ -2,7 +2,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+#variables :
+s_pv = 1.5   #en m2
+n_pv = 0.15 #rendement Panneau
+n_h1 = 0.85 #rendement hacheur 1
+n_h2 = 0.85 #rendement hacheur 2
+n_mot = 0.80 #rendement moteur
+W_stock_init = 350 #charge initiale de la batterie
+n_stock = 0.64 #rendement de stockage de la batterie
+b_assist = 0.5  #coeff d'assistance - 1=beaucoup d'assistance, 0=pas beaucoup d'assistance
+b_frein = 0.5  #coeff de récupération lors du freinage
+r = 0.311 #rayon de la roue
+m = 100+(s_pv*10.59)+4  #masse totale cycliste+vélo+panneau+batterie+moteur
 
 def recuperationDonneesEclairement(nomFichier) :
     """
@@ -166,7 +177,6 @@ denivele = denivele(altitude)
 
 #Calcul de la force
 f = 0.015
-m = 100
 g = 9.81
 Scx = 0.23
 Fres = f*m*g + Scx*(vitesse*vitesse)
@@ -189,18 +199,6 @@ energie = integration(temps, puissance, 0)/3600
 plt.grid('on')
 plt.axhline(0, color='gray')
 plt.axvline(0, color='gray')
-
-#variables :
-s_pv = 2   #en m2
-n_pv = 0.15 #rendement Panneau
-n_h1 = 0.85 #rendement hacheur 1
-n_h2 = 0.85 #rendement hacheur 2
-n_mot = 0.80 #rendement moteur
-W_stock_init = 350 #charge initiale de la batterie
-n_stock = 0.64 #rendement de stockage de la batterie
-b_assist = 0.5  #coeff d'assistance - 1=beaucoup d'assistance, 0=pas beaucoup d'assistance
-b_frein = 0.5  #coeff de récupération lors du freinage
-r = 0.311 #rayon de la roue
 
 
 
@@ -233,10 +231,14 @@ P_m = np.zeros(len(temps))
 P_frein = np.zeros(len(temps))
 P_cycliste = np.zeros(len(temps))
 
+troncage_frein = -10000 #désactivé (-> - infini)
 
 for i in range(len(temps)-1):
     if(puissance[i] < 0):
-        P_m[i] = b_frein*puissance[i]
+        if(b_frein*puissance[i] > troncage_frein*vitesse[i]):
+            P_m[i] = b_frein*puissance[i]
+        else:
+            P_m[i] = troncage_frein*vitesse[i]
         P_cycliste[i] = 0
     else:
         P_frein[i] = 0
@@ -299,13 +301,23 @@ W_stock = integration(temps/3600, P_bat, W_stock_init)
 
 
 #Rapport couple/vitesse de rotation
-omega = (vitesse/(2*np.pi*r))/60
+omega = (vitesse/(2*np.pi*r))*60
 C = P_m/omega
 
 #Affichage :
-plt.plot(omega, P_m, color = "#00005F", marker = ".", markersize=5, markevery=400, linewidth = 0)
+plt.plot(omega, P_m, color = "#5F0000", marker = ".", markersize=5, markevery=400, linewidth = 0)
 
 
+dim1 =  np.zeros(len(omega))
+
+for n in range(len(omega)-1):
+    dim1[n] = 3*omega[n]
+
+dim2 = -dim1
+
+#Affichage dimensionnement moteur:
+plt.plot(omega, dim1, color = "black", linewidth = 1)
+plt.plot(omega, dim2, color = "black", linewidth = 1)
 
 plt.ylabel("Puissance (W)")
 plt.xlabel("Vitesse de rotation (t/min)")
